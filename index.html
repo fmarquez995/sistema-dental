@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DentalSys - Gestión Clínica Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .tooth-surface { transition: all 0.2s; cursor: pointer; fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; }
+    .tooth-surface:hover { fill: #cbd5e1; }
+    .surface-caries { fill: #ef4444 !important; }
+    .surface-restoration { fill: #3b82f6 !important; }
+    .surface-sealant { fill: #10b981 !important; }
+  </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800">
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900 bg-opacity-80 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+      <div class="text-center mb-6">
+        <i class="fa-solid fa-tooth text-4xl text-blue-600 mb-2"></i>
+        <h2 class="text-2xl font-bold text-slate-900">DentalSys Admin</h2>
+        <p class="text-sm text-slate-500">Ingreso exclusivo para Odontólogos</p>
+      </div>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700">Usuario</label>
+          <input type="text" value="dr.martinez" class="w-full mt-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700">Contraseña</label>
+          <input type="password" value="demo1234" class="w-full mt-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">Ingresar al Sistema</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP DASHBOARD -->
+  <div id="app" class="hidden min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900 text-white flex-shrink-0">
+      <div class="p-6 border-b border-slate-800 flex items-center space-x-3">
+        <i class="fa-solid fa-tooth text-2xl text-blue-400"></i>
+        <span class="text-xl font-bold">DentalSys</span>
+      </div>
+      <nav class="p-4 space-y-1">
+        <button onclick="showSection('dashboard')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
+        </button>
+        <button onclick="showSection('pacientes')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-user-group"></i><span>Pacientes</span>
+        </button>
+        <button onclick="showSection('odontograma')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-teeth"></i><span>Odontograma</span>
+        </button>
+      </nav>
+      <div class="p-4 border-t border-slate-800 mt-auto">
+        <button onclick="logout()" class="w-full flex items-center space-x-2 px-4 py-2 text-red-400 hover:bg-slate-800 rounded-lg text-sm">
+          <i class="fa-solid fa-right-from-bracket"></i><span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+
+      <!-- DASHBOARD -->
+      <section id="sec-dashboard" class="space-y-6">
+        <h1 class="text-2xl font-bold text-slate-900">Panel General</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-500">Pacientes Registrados</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1">24</p>
+            </div>
+            <div class="p-3 bg-blue-50 text-blue-600 rounded-lg"><i class="fa-solid fa-users text-2xl"></i></div>
+          </div>
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-500">Citas para Hoy</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1">6</p>
+            </div>
+            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><i class="fa-solid fa-calendar-check text-2xl"></i></div>
+          </div>
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-500">Tratamientos Pendientes</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1">12</p>
+            </div>
+            <div class="p-3 bg-amber-50 text-amber-600 rounded-lg"><i class="fa-solid fa-notes-medical text-2xl"></i></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PACIENTES -->
+      <section id="sec-pacientes" class="hidden space-y-6">
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-bold text-slate-900">Directorio de Pacientes</h1>
+          <button onclick="alert('Función de agregar paciente')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2">
+            <i class="fa-solid fa-plus"></i><span>Nuevo Paciente</span>
+          </button>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 text-slate-700 font-medium border-b border-slate-200">
+              <tr>
+                <th class="p-4">Nombre Completo</th>
+                <th class="p-4">RUT / Identificación</th>
+                <th class="p-4">Teléfono</th>
+                <th class="p-4">Última Visita</th>
+                <th class="p-4 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="p-4 font-medium text-slate-900">Ana María Silva</td>
+                <td class="p-4">18.452.109-K</td>
+                <td class="p-4">+56 9 8765 4321</td>
+                <td class="p-4">12 Oct 2026</td>
+                <td class="p-4 text-right">
+                  <button onclick="showSection('odontograma')" class="text-blue-600 hover:text-blue-800 font-medium">Ver Odontograma</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ODONTOGRAMA INTERACTIVO -->
+      <section id="sec-odontograma" class="hidden space-y-6">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <h1 class="text-2xl font-bold text-slate-900">Odontograma Interactivo (FDI)</h1>
+              <p class="text-sm text-slate-500">Paciente: Ana María Silva | Selecciona la herramienta y haz clic sobre la superficie dental.</p>
+            </div>
+          </div>
+
+          <!-- Selector de Modo/Herramienta -->
+          <div class="flex space-x-3 mb-6">
+            <button onclick="setTool('caries')" id="btn-caries" class="px-4 py-2 rounded-lg border font-medium text-sm flex items-center space-x-2 bg-red-50 text-red-700 border-red-300">
+              <span class="w-3 h-3 bg-red-500 rounded-full"></span><span>Caries</span>
+            </button>
+            <button onclick="setTool('restoration')" id="btn-restoration" class="px-4 py-2 rounded-lg border font-medium text-sm flex items-center space-x-2 bg-white text-slate-700 border-slate-300">
+              <span class="w-3 h-3 bg-blue-500 rounded-full"></span><span>Obturación / Calza</span>
+            </button>
+            <button onclick="setTool('sealant')" id="btn-sealant" class="px-4 py-2 rounded-lg border font-medium text-sm flex items-center space-x-2 bg-white text-slate-700 border-slate-300">
+              <span class="w-3 h-3 bg-emerald-500 rounded-full"></span><span>Sellante</span>
+            </button>
+          </div>
+
+          <!-- Grid FDI Simplificado (Arcada Superior) -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Arcada Superior (Cuadrantes 1 y 2)</h3>
+            <div class="flex space-x-3 overflow-x-auto pb-4" id="upper-arch"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    let activeTool = 'caries';
+
+    function handleLogin(e) {
+      e.preventDefault();
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      renderTeeth();
+    }
+
+    function logout() {
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function showSection(section) {
+      ['dashboard', 'pacientes', 'odontograma'].forEach(s => {
+        document.getElementById(`sec-${s}`).classList.add('hidden');
+      });
+      document.getElementById(`sec-${section}`).classList.remove('hidden');
+    }
+
+    function setTool(tool) {
+      activeTool = tool;
+      ['caries', 'restoration', 'sealant'].forEach(t => {
+        const btn = document.getElementById(`btn-${t}`);
+        if(t === tool) {
+          btn.className = `px-4 py-2 rounded-lg border font-medium text-sm flex items-center space-x-2 bg-slate-800 text-white border-slate-800`;
+        } else {
+          btn.className = `px-4 py-2 rounded-lg border font-medium text-sm flex items-center space-x-2 bg-white text-slate-700 border-slate-300`;
+        }
+      });
+    }
+
+    function renderTeeth() {
+      const teethIds = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
+      const container = document.getElementById('upper-arch');
+      container.innerHTML = '';
+
+      teethIds.forEach(id => {
+        const div = document.createElement('div');
+        div.className = 'flex flex-col items-center bg-slate-50 p-2 rounded-lg border border-slate-200';
+        div.innerHTML = `
+          <span class="text-xs font-bold text-slate-600 mb-1">${id}</span>
+          <svg width="40" height="40" viewBox="0 0 100 100">
+            <!-- Top / Vestibular -->
+            <polygon points="0,0 100,0 70,30 30,30" class="tooth-surface" onclick="paint(this)" />
+            <!-- Right / Distal -->
+            <polygon points="100,0 100,100 70,70 70,30" class="tooth-surface" onclick="paint(this)" />
+            <!-- Bottom / Palatino -->
+            <polygon points="0,100 100,100 70,70 30,70" class="tooth-surface" onclick="paint(this)" />
+            <!-- Left / Mesial -->
+            <polygon points="0,0 0,100 30,70 30,30" class="tooth-surface" onclick="paint(this)" />
+            <!-- Center / Oclusal -->
+            <polygon points="30,30 70,30 70,70 30,70" class="tooth-surface" onclick="paint(this)" />
+          </svg>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function paint(el) {
+      el.classList.remove('surface-caries', 'surface-restoration', 'surface-sealant');
+      el.classList.add(`surface-${activeTool}`);
+    }
+  </script>
+</body>
+</html>
