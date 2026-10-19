@@ -7,34 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // Tus llaves reales de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAiYHA-8i9MrhD8dMdKdVJMXVba4NcniWg",
-      authDomain: "dentalsys-e1409.firebaseapp.com",
-      projectId: "dentalsys-e1409",
-      storageBucket: "dentalsys-e1409.firebasestorage.app",
-      messagingSenderId: "140013173842",
-      appId: "1:140013173842:web:45a97b6ae8ad370cf6f38b",
-      measurementId: "G-4P29SN49KN"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    window.auth = getAuth(app);
-    window.db = getFirestore(app);
-    window.fbLogin = signInWithEmailAndPassword;
-    window.fbLogout = signOut;
-    window.fbAuthState = onAuthStateChanged;
-    window.fbCollection = collection;
-    window.fbAddDoc = addDoc;
-    window.fbGetDocs = getDocs;
-  </script>
-
   <style>
     .tooth-surface { transition: all 0.2s; cursor: pointer; fill: #f8fafc; stroke: #64748b; stroke-width: 1.5; }
     .tooth-surface:hover { fill: #e2e8f0; }
@@ -62,7 +34,7 @@
           <label class="block text-sm font-medium text-slate-700">Contraseña</label>
           <input type="password" id="loginPass" placeholder="******" class="w-full mt-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
         </div>
-        <p id="loginError" class="text-xs text-red-500 hidden">Credenciales incorrectas o error de conexión.</p>
+        <p id="loginError" class="text-xs text-red-500 hidden">Credenciales incorrectas o error de autenticación.</p>
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition">Ingresar al Sistema</button>
       </form>
     </div>
@@ -171,39 +143,61 @@
     </main>
   </div>
 
+  <!-- Firebase Script Module -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAiYHA-8i9MrhD8dMdKdVJMXVba4NcniWg",
+      authDomain: "dentalsys-e1409.firebaseapp.com",
+      projectId: "dentalsys-e1409",
+      storageBucket: "dentalsys-e1409.firebasestorage.app",
+      messagingSenderId: "140013173842",
+      appId: "1:140013173842:web:45a97b6ae8ad370cf6f38b",
+      measurementId: "G-4P29SN49KN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.fbLogin = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
+    window.fbLogout = () => signOut(auth);
+    window.fbAddPaciente = (data) => addDoc(collection(db, "pacientes"), data);
+    window.fbGetPacientes = () => getDocs(collection(db, "pacientes"));
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        loadPacientes();
+        renderArchs();
+      } else {
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('loginModal').classList.remove('hidden');
+      }
+    });
+  </script>
+
   <script>
     let activeTool = 'caries';
     let currentPatientId = null;
-
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        window.fbAuthState(window.auth, (user) => {
-          if (user) {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            loadPacientes();
-            renderArchs();
-          } else {
-            document.getElementById('app').classList.add('hidden');
-            document.getElementById('loginModal').classList.remove('hidden');
-          }
-        });
-      }, 800);
-    });
 
     async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value;
       const pass = document.getElementById('loginPass').value;
       try {
-        await window.fbLogin(window.auth, email, pass);
+        await window.fbLogin(email, pass);
       } catch (err) {
         document.getElementById('loginError').classList.remove('hidden');
       }
     }
 
     async function logout() {
-      await window.fbLogout(window.auth);
+      await window.fbLogout();
     }
 
     function showSection(sec) {
@@ -226,33 +220,45 @@
       const dni = prompt("RUT o DNI:");
       const tel = prompt("Teléfono:");
       if(nombre && dni) {
-        await window.fbAddDoc(window.fbCollection(window.db, "pacientes"), {
-          nombre, dni, telefono: tel, fechaRegistro: new Date()
-        });
-        loadPacientes();
+        try {
+          await window.fbAddPaciente({
+            nombre: nombre,
+            dni: dni,
+            telefono: tel || '',
+            fechaRegistro: new Date().toISOString()
+          });
+          alert("¡Paciente registrado exitosamente!");
+          loadPacientes();
+        } catch (error) {
+          alert("Error al registrar paciente: " + error.message);
+        }
       }
     }
 
     async function loadPacientes() {
-      const querySnapshot = await window.fbGetDocs(window.fbCollection(window.db, "pacientes"));
-      const tbody = document.getElementById('lista-pacientes');
-      tbody.innerHTML = '';
-      let count = 0;
-      querySnapshot.forEach((docSnap) => {
-        count++;
-        const p = docSnap.data();
-        tbody.innerHTML += `
-          <tr>
-            <td class="p-4 font-medium text-slate-900">${p.nombre}</td>
-            <td class="p-4">${p.dni}</td>
-            <td class="p-4">${p.telefono || '-'}</td>
-            <td class="p-4 text-right">
-              <button onclick="selectPatient('${docSnap.id}', '${p.nombre}')" class="text-blue-600 hover:text-blue-800 font-medium">Ver Odontograma</button>
-            </td>
-          </tr>
-        `;
-      });
-      document.getElementById('stat-pacientes').innerText = count;
+      try {
+        const querySnapshot = await window.fbGetPacientes();
+        const tbody = document.getElementById('lista-pacientes');
+        tbody.innerHTML = '';
+        let count = 0;
+        querySnapshot.forEach((docSnap) => {
+          count++;
+          const p = docSnap.data();
+          tbody.innerHTML += `
+            <tr>
+              <td class="p-4 font-medium text-slate-900">${p.nombre}</td>
+              <td class="p-4">${p.dni}</td>
+              <td class="p-4">${p.telefono || '-'}</td>
+              <td class="p-4 text-right">
+                <button onclick="selectPatient('${docSnap.id}', '${p.nombre}')" class="text-blue-600 hover:text-blue-800 font-medium">Ver Odontograma</button>
+              </td>
+            </tr>
+          `;
+        });
+        document.getElementById('stat-pacientes').innerText = count;
+      } catch (err) {
+        console.error("Error al obtener lista de pacientes:", err);
+      }
     }
 
     function selectPatient(id, nombre) {
