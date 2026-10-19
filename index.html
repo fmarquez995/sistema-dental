@@ -11,16 +11,17 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Reemplaza con tus llaves de Firebase (Firebase Console -> Project Settings)
+    // Tus llaves reales de Firebase
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_PROYECTO.firebaseapp.com",
-      projectId: "TU_PROYECTO_ID",
-      storageBucket: "TU_PROYECTO.appspot.com",
-      messagingSenderId: "TU_SENDER_ID",
-      appId: "TU_APP_ID"
+      apiKey: "AIzaSyAiYHA-8i9MrhD8dMdKdVJMXVba4NcniWg",
+      authDomain: "dentalsys-e1409.firebaseapp.com",
+      projectId: "dentalsys-e1409",
+      storageBucket: "dentalsys-e1409.firebasestorage.app",
+      messagingSenderId: "140013173842",
+      appId: "1:140013173842:web:45a97b6ae8ad370cf6f38b",
+      measurementId: "G-4P29SN49KN"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -32,8 +33,6 @@
     window.fbCollection = collection;
     window.fbAddDoc = addDoc;
     window.fbGetDocs = getDocs;
-    window.fbDoc = doc;
-    window.fbSetDoc = setDoc;
   </script>
 
   <style>
@@ -57,7 +56,7 @@
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
-          <input type="email" id="loginEmail" placeholder="dentista@clinica.com" class="w-full mt-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+          <input type="email" id="loginEmail" value="dentista@clinica.com" class="w-full mt-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
         </div>
         <div>
           <label class="block text-sm font-medium text-slate-700">Contraseña</label>
@@ -189,7 +188,7 @@
             document.getElementById('loginModal').classList.remove('hidden');
           }
         });
-      }, 1000);
+      }, 800);
     });
 
     async function handleLogin(e) {
